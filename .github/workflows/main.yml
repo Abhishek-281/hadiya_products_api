@@ -1,0 +1,31 @@
+name: Use Azure Key Vault Secrets
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  use-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Login to Azure
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Step 2: Fetch Secrets from Azure Key Vault
+      - name: Get secrets from Azure Key Vault
+        uses: azure/keyvault-secrets@v1
+        with:
+          keyvault: qwertydemoprism # Replace with your Key Vault name
+          secrets: |
+            EncryptionKey
+            ExtenalGeoFencingCorpIds
+
+      # Step 3: Use the Secrets
+      - name: Print Secret (for demonstration)
+        run: |
+          echo "Secret 1: ${{ secrets.EncryptionKey }}"
+          echo "Secret 2: ${{ secrets.ExtenalGeoFencingCorpIds }}"
