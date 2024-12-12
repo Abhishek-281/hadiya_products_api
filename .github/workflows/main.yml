@@ -17,7 +17,7 @@ jobs:
 
       # Step 2: Fetch Secrets from Azure Key Vault
       - name: Get secrets from Azure Key Vault
-        uses: azure/keyvault-secrets@v1
+        uses: azure/keyvault-secrets-action@v1
         with:
           keyvault: qwertydemoprism # Replace with your Key Vault name
           secrets: |
