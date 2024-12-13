@@ -12,8 +12,10 @@ jobs:
   replace-tokens:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout Code
       - uses: actions/checkout@v3
 
+      # Step 2: Set Environment Variables Based on Branch
       - name: Set Environment Variable and KeyVault
         run: |
           if [[ $GITHUB_REF == refs/heads/release* ]]; then
@@ -24,11 +26,13 @@ jobs:
             echo "KEYVAULT_NAME=qwertydemoprism" >> $GITHUB_ENV
           fi
 
+      # Step 3: Azure Login
       - name: Azure login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS1 }}
 
+      # Step 4: Fetch Secrets from Azure Key Vault and Set Variables
       - name: Fetch secrets and set variables
         uses: azure/cli@v1
         with:
@@ -39,11 +43,12 @@ jobs:
               echo "${secret}=${value}" >> $GITHUB_ENV
             done
 
+      # Step 5: Replace Tokens in appsettings.json
       - name: Replace Tokens in appsettings.json
         uses: cschleiden/replace-tokens@v1
         with:
           files: '**/appsettings.json'
-          tokenPrefix: "#{" 
+          tokenPrefix: "#{"
           tokenSuffix: "}#"
         env:
           EncryptionKey: ${{ env.EncryptionKey }}
@@ -55,6 +60,7 @@ jobs:
           Proxy-URI: ${{ env.Proxy-URI }}
           x-tlm-auth: ${{ env.x-tlm-auth }}
 
+      # Step 6: Verify Token Replacement
       - name: Verify Token Replacement
         run: |
           echo "Environment: ${{ env.ENV }}"
@@ -62,18 +68,20 @@ jobs:
           echo "Displaying replaced appsettings.json content:"
           cat appsettings.json
 
-      # Step 8: Docker Login to ACR
+      # Step 7: Docker Login to ACR
       - name: Docker Login to ACR
         run: |
           echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
-      # Step 9: Build and Push Docker Image
+      # Step 8: Build and Push Docker Image with Latest Tag
       - name: Build and Push Docker Image
         env:
           IMAGE_TAG: ${{ github.run_id }}
         run: |
           echo "Building Docker image for environment: $ENV"
-          # Build the Docker image and tag it with the run ID
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:${IMAGE_TAG} .
-          # Push the Docker image to Azure Container Registry (ACR)
+          # Build the Docker image with both the run ID and latest tag
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:${IMAGE_TAG} -t ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:latest .
+          # Push the Docker image with the specific tag
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:${IMAGE_TAG}
+          # Push the Docker image with the latest tag
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:latest
