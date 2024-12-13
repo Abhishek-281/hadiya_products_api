@@ -1,4 +1,4 @@
-name: Use Azure Key Vault Secrets
+name: Verify Token Replacement
 
 on:
   push:
@@ -6,22 +6,39 @@ on:
       - main
 
 jobs:
-  use-secrets:
+  verify-tokens:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Azure login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS1 }}
+          creds: '{"clientId":"${{ secrets.CLIENTID }}","clientSecret":"${{ secrets.CLIENTSECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTIONID }}","tenantId":"${{ secrets.TENANTID }}"}'
 
-      - name: Get secrets from Azure Key Vault
+      - name: Fetch secrets and set variables
         uses: azure/cli@v1
         with:
           inlineScript: |
-            echo "ENCRYPTION_KEY=$(az keyvault secret show --name EncryptionKey --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
-            echo "EXTERNAL_GEOFENCING_CORP_IDS=$(az keyvault secret show --name ExtenalGeoFencingCorpIds --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
+            echo "ENCRYPTION_KEY=$(az keyvault secret show --name EncryptionKey --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+            echo "EXTERNAL_GEOFENCING_CORP_IDS=$(az keyvault secret show --name ExtenalGeoFencingCorpIds --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+            echo "JWT_EXPIRY=$(az keyvault secret show --name Jwt-Expiry --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+            echo "PRISMHR_CLIENT_ID=$(az keyvault secret show --name prismhrclientId --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+            echo "SERVICE_BUS_CONNECTION=$(az keyvault secret show --name service-bus-connectionstring --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
 
-      - name: Use Secrets
+      - name: Replace Tokens in appsettings.json
+        uses: cschleiden/replace-tokens@v1
+        with:
+          files: '["**/appsettings.json"]'
+          tokenPrefix: "#{" 
+          tokenSuffix: "}#"
+        env:
+          EncryptionKey: ${{ env.ENCRYPTION_KEY }}
+          ExtenalGeoFencingCorpIds: ${{ env.EXTERNAL_GEOFENCING_CORP_IDS }}
+          Jwt-Expiry: ${{ env.JWT_EXPIRY }}
+          prismhrclientId: ${{ env.PRISMHR_CLIENT_ID }}
+          service-bus-connectionstring: ${{ env.SERVICE_BUS_CONNECTION }}
+
+      - name: Display replaced appsettings.json
         run: |
-          echo "Secret 1: ${{ env.ENCRYPTION_KEY }}"
-          echo "Secret 2: ${{ env.EXTERNAL_GEOFENCING_CORP_IDS }}"
+          cat appsettings.json
