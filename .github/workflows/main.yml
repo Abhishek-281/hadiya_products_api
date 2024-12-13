@@ -62,7 +62,12 @@ jobs:
           echo "Displaying replaced appsettings.json content:"
           cat appsettings.json
 
-      # Step 8: Docker Build and Push
+      # Step 8: Docker Login to ACR
+      - name: Docker Login to ACR
+        run: |
+          echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      # Step 9: Build and Push Docker Image
       - name: Build and Push Docker Image
         env:
           IMAGE_TAG: ${{ github.run_id }}
