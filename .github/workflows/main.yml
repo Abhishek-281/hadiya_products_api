@@ -12,29 +12,28 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Environment Variable
+      - name: Set Environment Variable and KeyVault
         run: |
           if [[ $GITHUB_REF == refs/heads/release/* ]]; then
             echo "ENV=uat" >> $GITHUB_ENV
+            echo "KEYVAULT_NAME=qwertyrelease" >> $GITHUB_ENV
           elif [[ $GITHUB_REF == refs/heads/develop ]]; then
             echo "ENV=dev" >> $GITHUB_ENV
+            echo "KEYVAULT_NAME=qwertydemoprism" >> $GITHUB_ENV
           fi
 
       - name: Azure login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS1 }}
+
       - name: Fetch secrets and set variables
         uses: azure/cli@v1
         with:
           inlineScript: |
-            # Set Key Vault name based on environment
-            
-            
-            # Fetch and set all secrets from Key Vault
-            secrets=$(az keyvault secret list --vault-name qwertydemoprism  --query '[].name' -o tsv)
+            secrets=$(az keyvault secret list --vault-name ${{ env.KEYVAULT_NAME }} --query '[].name' -o tsv)
             for secret in $secrets; do
-              value=$(az keyvault secret show --name $secret --vault-name qwertydemoprism  --query 'value' -o tsv)
+              value=$(az keyvault secret show --name $secret --vault-name ${{ env.KEYVAULT_NAME }} --query 'value' -o tsv)
               echo "${secret}=${value}" >> $GITHUB_ENV
             done
 
@@ -45,14 +44,22 @@ jobs:
           tokenPrefix: "#{" 
           tokenSuffix: "}#"
         env:
-          EncryptionKey: ${{ env.EncryptionKey }}
-          ExtenalGeoFencingCorpIds: ${{ env.ExtenalGeoFencingCorpIds }}
-          Jwt-Expiry: ${{ env.Jwt-Expiry }}
-          prismhrclientId: ${{ env.prismhrclientId }}
-          service-bus-connectionstring: ${{ env.service-bus-connectionstring }}
+          # For develop branch (qwertydemoprism)
+          ${{ if eq(github.ref, 'refs/heads/develop') }}:
+            EncryptionKey: ${{ env.EncryptionKey }}
+            ExtenalGeoFencingCorpIds: ${{ env.ExtenalGeoFencingCorpIds }}
+            Jwt-Expiry: ${{ env.Jwt-Expiry }}
+            prismhrclientId: ${{ env.prismhrclientId }}
+            service-bus-connectionstring: ${{ env.service-bus-connectionstring }}
+          # For release branch (qwertyrelease)
+          ${{ if startsWith(github.ref, 'refs/heads/release/') }}:
+            Notification-URI: ${{ env.Notification-URI }}
+            Proxy-URI: ${{ env.Proxy-URI }}
+            x-tlm-auth: ${{ env.x-tlm-auth }}
 
       - name: Verify Token Replacement
         run: |
           echo "Environment: ${{ env.ENV }}"
+          echo "Using KeyVault: ${{ env.KEYVAULT_NAME }}"
           echo "Displaying replaced appsettings.json content:"
           cat appsettings.json
