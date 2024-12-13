@@ -1,0 +1,314 @@
+{
+  "AppplicationSettings": {
+    "apiUniqueName": "TLM.IdentityService.API",
+    "apiSwaggerSettings": {
+      "CompatibilityMode": true,
+      "basePath": "identity",
+      "hostVirtualBasePath": "",
+      "swaggerDocVersion": "1.0.0",
+      "apiVersion": "1.0.0",
+      "apiTitle": "TLM Identity Service API",
+      "apiDescription": "TLM Identity Service 1.0.0",
+      "apiSwaggerEndpoint": "swagger/1.0.0/swagger.json",
+      "apiContactName": "Mobility Support",
+      "apiContactUrl": "https://localhost:53150/",
+      "apiContactEmail": "#{Support-Email}#",
+      "apiToS": "https://localhost/",
+      "UseSecurityDefinition": true,
+      "SecurityDefinitionName": "ApiKey",
+      "SecuritySchemeDescription": "Authentication by bearer token",
+      "SecuritySchemeParameterIn": "Header",
+      "SecuritySchemeName": "Authorization-token",
+      "SecuritySchemeType": "ApiKey",
+      "SecurityScheme": "Bearer",
+      "OpenApiReferenceType": "SecurityScheme",
+      "OpenApiReferenceId": "Bearer",
+      "EnableApiSwaggerGeneration": true
+    },
+    "SdkSettings": {
+      "UseStandardBadRequestResult": false,
+      "UseLogging": false,
+      "UseGlobalExceptionHandler": false,
+      "AuditLoggerSettings": {
+        "MessageLoggerProvider": "Kafka",
+        "LogProducerIdentity": "TLM.Identity.API",
+        "FileLogLocation": "",
+        "KafkaTopic": "prismhr-audit-mobility-mis",
+        "KafkaBrokers": "10.58.150.57:9092,10.58.150.58:9092,10.58.150.59:9092",
+        "UdpIp": "",
+        "UdpPort": "",
+        "MaskProperties": [ "password" ],
+        "EnableAuditMiddleware": false,
+        "RequestBufferSize": 1024,
+        "ResponseBufferChunkSize": -1,
+        "HeaderExclusions": "Authorization",
+        "LogAuditErrors": false
+      },
+      "InstrumentationLoggerSettings": {
+        "MessageLoggerProvider": "Udp",
+        "LogProducerIdentity": "TLM.Identity.API",
+        "FileLogLocation": "",
+        "KafkaTopic": "",
+        "KafkaBrokers": "",
+        "UdpIp": "10.58.150.51",
+        "UdpPort": "10514",
+        "MaskProperties": [],
+        "LogLevel": "Information",
+        "MaxCharacters": "1817"
+      },
+      "SecuritySettings": {
+        "UseJwtAuthentication": false,
+        "JwtSecurityMode": "Certificate",
+        "JwtSharedSecret": "Hasta la vista, baby",
+        "JwtCertificateFriendlyName": "",
+        "FindValue": "AEM.JWT.SIGN.QA",
+        "FindType": "FindBySubjectName",
+        "StoreName": "My",
+        "StoreLocation": "CurrentUser"
+      },
+      "sdkSettings": {
+        "ChannelIdClaim": "cid",
+        "UserIdentifierClaim": "BusinessEntityUserId",
+        "SessionIdClaim": "sessionid",
+        "ScopesClaim": "scopes"
+      },
+      "sdkToggles": [ "modeOne" ]
+    },
+    "apiSettings": {
+      "CERT_USERNAME": "AP100012",
+      "NidApiDetailId": "#{NidApiDetailId}#",
+      "NidApiDetailSecret": "#{NidSecret}#",
+      "ApiVersion": "PrismHR.Mobility.API"
+    },
+    "apiToggles": [ "devEnable" ] //toggles are single entry keys (similar to the implementation of cheat codes in the old stack)
+  },
+  "x-tlm-authtoken": "#{x-tlm-auth}#", //should be called internally not externally
+  "Gateway-Authentication-Url": "#{Gateway-Authentication-Url}#",
+  "Gateway-Client-Id": "#{Gateway-Client-Id}#",
+  "Gateway-Client-Secret": "#{Gateway-Client-Secret}#",
+
+  "app-client-Id": "#{App-Client-Id}#",
+  "app-tenant-id": "#{App-Tenant-Id}#",
+  "app-client-secret": "#{App-Client-secret}#",
+  "MinAndroidVersion": "1.0.171",
+  "MinIOSVersion": "1.0.171",
+
+  "Endpoints": {
+    "RestEndpoints": [
+      {
+        "Contract": "Proxy_API_Endpoint",
+        "Uri": "#{Proxy-URI}#",
+        "Header": {
+          "x-tlm-authtoken": "#{x-tlm-auth}#" //should be called internally not externally"       
+        }
+      },
+      {
+        "Contract": "Notification_API_Endpoint",
+        "Uri": "#{Notification-URI}#",
+        "Header": {
+          "x-tlm-authtoken": "#{x-tlm-auth}#" //should be called internally not externally"       
+        }
+      }
+    ],
+    "SoapEndpoints": []
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Warning"
+    },
+    "EventLog": {
+      "EventId": 99,
+      "Application": "APPLICATION",
+      "Source": "Byzantine Producers",
+      "Description": "byzantine fault tolerance architecture for log resilience strategies",
+      "MessageLimitIntervalInMinutes": 15,
+      "MessageMaintenanceModulus": 10
+    },
+    "Producers": [
+      {
+        "Name": "AuditLog",
+        "ByzantineProducerResilienceType": "Disk",
+        "PersistanceFileLocation": "./bin/Debug/netcoreapp3.1/Data/AuditLog",
+        "EnableCompression": true,
+        "MaxMessageCount": 10000,
+        "PollingWaitTimespanInMilliseconds": 250,
+        "BindingType": "Kafka",
+        "Binding": {
+          "BootstrapServers": "172.23.99.134:9093,172.23.99.136:9093,172.23.99.135:9093",
+          "EnableIdempotence": false,
+          "MessageTimeoutMs": 2000,
+          "MessageMaxBytes": 1000000,
+          "EnableSslCertificateVerification": false,
+          "EnableSslMutualAuthentication": true,
+          "MessageSendMaxRetries": 0,
+          "SecurityProtocol": "Ssl",
+          "SslCaLocation": "./bin/Debug/netcoreapp3.1/Certificates/Nedbank Root Sha2.cer",
+          "SslCertificateLocation": "./bin/Debug/netcoreapp3.1/Certificates/NID-Kafka.cer",
+          "SslKeyLocation": "./bin/Debug/netcoreapp3.1/Certificates/NID-Kafka.key",
+          "Topic": "log-nedid-mis-audit"
+        }
+      },
+      {
+        "Name": "InstrumentationLog",
+        "ByzantineProducerResilienceType": "Disk",
+        "PersistanceFileLocation": "./bin/Debug/netcoreapp3.1/Data/InstrumentationLog",
+        "EnableCompression": true,
+        "MaxMessageCount": 10000,
+        "PollingWaitTimespanInMilliseconds": 250,
+        "BindingType": "Kafka",
+        "Binding": {
+          "BootstrapServers": "172.23.99.134:9093,172.23.99.136:9093,172.23.99.135:9093",
+          "EnableIdempotence": false,
+          "MessageTimeoutMs": 2000,
+          "MessageMaxBytes": 1000000,
+          "EnableSslCertificateVerification": false,
+          "EnableSslMutualAuthentication": true,
+          "MessageSendMaxRetries": 0,
+          "SecurityProtocol": "Ssl",
+          "SslCaLocation": "./bin/Debug/netcoreapp3.1/Certificates/Nedbank Root Sha2.cer",
+          "SslCertificateLocation": "./bin/Debug/netcoreapp3.1/Certificates/NID-Kafka.cer",
+          "SslKeyLocation": "./bin/Debug/netcoreapp3.1/Certificates/NID-Kafka.key",
+          "Topic": "prismhr-sys-mobility-mis"
+        }
+      }
+    ],
+    "NidCustomLogging": {
+      "LogProducerIdentity": "TLM.Identity.API",
+      "EnableNidCustomLogging": "true",
+      "AzureLoggerEnable": true,
+      "Audit": {
+        "Title": "Prismhr Audit",
+        "TopicName": "prismhr-audit-mobility-mis",
+        "AzureKafkaAuditLogTopic": "log-mobility-mis-audit",
+        "KafkaServers": "172.23.99.134:9093,172.23.99.136:9093,172.23.99.135:9093", //"10.58.150.57:9092,10.58.150.58:9092,10.58.150.59:9092", //Uncomment For QA
+        "KafkaAzureServers": "172.23.99.134:9093,172.23.99.136:9093,172.23.99.135:9093", //"172.23.99.80:9093,172.23.99.79:9093,172.23.99.81:9093", //Uncomment For QA
+        "XmlMaskFields": "Password,Pin,password,OldPassword,NewPassword,ProfilePassword,SecretValue,ProfilePIN,ProfilePin",
+        "JsonMaskFields": "*:Password,Pin,password,OldPassword,NewPassword,pin,oldPassword,newPassword|isSecure:customerResponse,freeTextResponse|IsSecure:CustomerResponse,FreeTextResponse",
+        "IgnoreHeader": "x-mobile-device-info"
+      },
+      "Instrumentation": {
+        "UdpIp": "10.58.150.51",
+        "UdpPort": "10514",
+        "MaxCharacters": "30000",
+        "EnableMasking": "false",
+        "JsonTextMaskingFields": "Password|password|OldPassword|oldPassword|oldpassword|NewPassword|newPassword|newpassword|ProfilePassword|profilePassword|profilepassword|SecretValue|secretValue|secretvalue|Pin|pin|PIN|ProfilePIN|ProfilePin|profilePin|profilepin|nidPassword",
+        "AlwaysMaskJsonFields": "faceMap|auditTrailImage|lowQualityAuditTrailImage",
+        "TcpIp": "172.23.99.132",
+        "TcpPort": "10514",
+        "TcpCompatibleWithAzure": true,
+        "UdpCompatibleWithAzure": false,
+        "TcpSSLCertificates": "Issuing Sha2,Nedbank Policy Sha2,Nedbank Root Sha2",
+        "KafkaAzureServers": "172.23.99.134:9093,172.23.99.136:9093,172.23.99.135:9093", //"172.23.99.80:9093,172.23.99.79:9093,172.23.99.81:9093", //Uncomment For QA
+        "kafkaAzureTopic": "prismhr-sys-mobility-mis",
+        "ConsumerGroupIdPrefix": "nedid-consumer"
+      }
+    },
+    "DevTracing": {
+      "Enable_Dev_Request_Response_Logging_At_Controller_Layer": "false",
+      "Enable_Dev_Request_Response_Logging_At_Domain_Layer": "false",
+      "Enable_Dev_Request_Response_Logging_At_Resource_Layer": "false",
+      "Enable_Dev_Common_Text_Logging": "false"
+    }
+  },
+  "AllowedHosts": "*",
+  "Serilog": {
+    "using": [ "Serilog.Sinks.File", "Serilog.Sinks.ApplicationInsights" ],
+    "Minimumlevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "Microsoft.AspNetCore": "Information",
+        "Microsoft.Hosting.Lifetime": "Warning"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "ApplicationInsights",
+        "Args": {
+          "connectionString": "#{AppInsightsConnectionString}#",
+          "telemetryConverter": "Serilog.Sinks.ApplicationInsights.TelemetryConverters.TraceTelemetryConverter, Serilog.Sinks.ApplicationInsights"
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "C:\\API\\logs\\ApiLog-.log",
+          "rollingInterval": "Day",
+          "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}]"
+        }
+
+      }
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName"
+    ]
+  },
+  "AllowedHostsClientURL": [ "http://localhost:6503,http://localhost:6504,http://localhost:4200,http://nsndevnediapp01.africa.nedcor.net:4200" ],
+  "ConnectionStrings": {
+    "ConnTLM": "" //server=192.168.6.236;database=MobileDB;Encrypt=false;uid=mobile;pwd=Passw0rd@1234;
+  },
+  "EncryptionKey": "#{EncryptionKey}#",
+  "ClientUserName": "AP100012",
+  "ClientSigningNoPassCert": "NOPASS.SOAP.SIGN.DEV",
+  "AuthenticateServiceSigningCert": "AEM.JWT.SIGN",
+  "PrismhrClient": {
+    "UserName": {
+      "ClientUserName": "AP100012"
+    }
+  },
+  "Partner": {
+    "PrismhrId": {
+      "ClientId": "#{prismhrclientId}#"
+    }
+  },
+  "SmtpClient": {
+    "Port": 25,
+    "DeliveryMethod": 0,
+    "UseDefaultCredentials": false,
+    "Host": "smtp.it.nednet.co.za"
+  },
+  "AuthAPI_ClientId": "@AuthAPI_ClientId@",
+  "EcllipseChannelId": "378",
+  "SubClaim": "sub",
+  "IsResultCodeSourceJson": true,
+  "MaxKeepAliveIntervalInMinutes": "3",
+  "ConsumerService": {
+    "ServicePauseBeforeRecycleInMilliSeconds": 10000 //10 secs
+  },
+  "JwtSettings": {
+    "JwtSecurityMode": "Certificate",
+    "JwtCertificateFriendlyName": "",
+    "FindValue": "AEM.JWT.SIGN.QA",
+    "FindType": "FindBySubjectName",
+    "StoreName": "My",
+    "StoreLocation": "CurrentUser",
+    "ClockSkewInSeconds": "60" //1 min allowable in difference
+  },
+  "SessionTimeout": "00:01:25",
+  "Jwt": {
+    "Key": "#{SecretKey}#",
+    "Issuer": "https://localhost:44341",
+    "Audience": "http://localhost:4200",
+    "Expiry": "#{Jwt-Expiry}#"
+  },
+  "encryptkey": "#{EncryptKey}#",
+  "ResultCodeFileName": "IdentityResultCodes.json",
+  "ServiceBusConnectionString": "#{service-bus-connectionstring}#",
+  "QueueName": "#{service-bus-QueueName}#",
+  "KeyVaultSecrets": {
+    "Vault": "#{keyvault-vault}#",
+    "ClientId": "#{keyvault-ClientId}#",
+    "ClientSecret": "#{keyvault-ClientSecret}#",
+    "TenantId": "#{keyvault-TenantId}#"
+  },
+  "CorpIdPlaceHolders": "_,., ",
+  "IdleTimeout": "30",
+  "SitesThreshHold": "300",
+  "CommandTimeout": "120",
+  "ExtenalGeoFencingCorpIds": "#{ExtenalGeoFencingCorpIds}#",
+  "LogResponsesInAppInsight": true
+}
