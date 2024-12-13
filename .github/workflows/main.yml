@@ -61,3 +61,14 @@ jobs:
           echo "Using KeyVault: ${{ env.KEYVAULT_NAME }}"
           echo "Displaying replaced appsettings.json content:"
           cat appsettings.json
+
+      # Step 8: Docker Build and Push
+      - name: Build and Push Docker Image
+        env:
+          IMAGE_TAG: ${{ github.run_id }}
+        run: |
+          echo "Building Docker image for environment: $ENV"
+          # Build the Docker image and tag it with the run ID
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:${IMAGE_TAG} .
+          # Push the Docker image to Azure Container Registry (ACR)
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/identity-api:${IMAGE_TAG}
