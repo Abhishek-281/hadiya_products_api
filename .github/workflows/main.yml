@@ -1,4 +1,4 @@
-name: Verify Token Replacement
+name: Replace and Verify Tokens
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  verify-tokens:
+  replace-tokens:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -14,22 +14,22 @@ jobs:
       - name: Azure login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS1 }}
+          creds: '{"clientId":"${{ secrets.CLIENTID }}","clientSecret":"${{ secrets.CLIENTSECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTIONID }}","tenantId":"${{ secrets.TENANTID }}"}'
 
       - name: Fetch secrets and set variables
         uses: azure/cli@v1
         with:
           inlineScript: |
-            echo "ENCRYPTION_KEY=$(az keyvault secret show --name EncryptionKey --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
-            echo "EXTERNAL_GEOFENCING_CORP_IDS=$(az keyvault secret show --name ExtenalGeoFencingCorpIds --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
-            echo "JWT_EXPIRY=$(az keyvault secret show --name Jwt-Expiry --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
-            echo "PRISMHR_CLIENT_ID=$(az keyvault secret show --name prismhrclientId --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
-            echo "SERVICE_BUS_CONNECTION=$(az keyvault secret show --name service-bus-connectionstring --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+            echo "ENCRYPTION_KEY=$(az keyvault secret show --name EncryptionKey --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
+            echo "EXTERNAL_GEOFENCING_CORP_IDS=$(az keyvault secret show --name ExtenalGeoFencingCorpIds --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
+            echo "JWT_EXPIRY=$(az keyvault secret show --name Jwt-Expiry --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
+            echo "PRISMHR_CLIENT_ID=$(az keyvault secret show --name prismhrclientId --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
+            echo "SERVICE_BUS_CONNECTION=$(az keyvault secret show --name service-bus-connectionstring --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
 
       - name: Replace Tokens in appsettings.json
         uses: cschleiden/replace-tokens@v1
         with:
-          files: '["**/appsetting.json"]'
+          files: '**/appsetting.json'
           tokenPrefix: "#{" 
           tokenSuffix: "}#"
         env:
@@ -39,6 +39,7 @@ jobs:
           prismhrclientId: ${{ env.PRISMHR_CLIENT_ID }}
           service-bus-connectionstring: ${{ env.SERVICE_BUS_CONNECTION }}
 
-      - name: Display replaced appsettings.json
+      - name: Verify Token Replacement
         run: |
+          echo "Displaying replaced appsettings.json content:"
           cat appsetting.json
