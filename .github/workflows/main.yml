@@ -32,9 +32,9 @@ jobs:
             
             
             # Fetch and set all secrets from Key Vault
-            secrets=$(az keyvault secret list --vault-name $KEYVAULT_NAME --query '[].name' -o tsv)
+            secrets=$(az keyvault secret list --vault-name qwertydemoprism  --query '[].name' -o tsv)
             for secret in $secrets; do
-              value=$(az keyvault secret show --name $secret --vault-name $KEYVAULT_NAME --query 'value' -o tsv)
+              value=$(az keyvault secret show --name $secret --vault-name qwertydemoprism  --query 'value' -o tsv)
               echo "${secret}=${value}" >> $GITHUB_ENV
             done
 
