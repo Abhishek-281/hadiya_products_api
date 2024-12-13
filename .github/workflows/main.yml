@@ -29,7 +29,7 @@ jobs:
       - name: Replace Tokens in appsettings.json
         uses: cschleiden/replace-tokens@v1
         with:
-          files: '["**/appsettings.json"]'
+          files: '["**/appsetting.json"]'
           tokenPrefix: "#{" 
           tokenSuffix: "}#"
         env:
@@ -41,4 +41,4 @@ jobs:
 
       - name: Display replaced appsettings.json
         run: |
-          cat appsettings.json
+          cat appsetting.json
