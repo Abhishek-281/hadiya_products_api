@@ -20,26 +20,26 @@ jobs:
         uses: azure/cli@v1
         with:
           inlineScript: |
-            echo "ENCRYPTION_KEY=$(az keyvault secret show --name EncryptionKey --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
-            echo "EXTERNAL_GEOFENCING_CORP_IDS=$(az keyvault secret show --name ExtenalGeoFencingCorpIds --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
-            echo "JWT_EXPIRY=$(az keyvault secret show --name Jwt-Expiry --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
-            echo "PRISMHR_CLIENT_ID=$(az keyvault secret show --name prismhrclientId --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
-            echo "SERVICE_BUS_CONNECTION=$(az keyvault secret show --name service-bus-connectionstring --vault-name qwertydemoprism --query value -o tsv)" >> $GITHUB_ENV
+            secrets=$(az keyvault secret list --vault-name qwertydemoprism --query '[].name' -o tsv)
+            for secret in $secrets; do
+              value=$(az keyvault secret show --name $secret --vault-name qwertydemoprism --query 'value' -o tsv)
+              echo "${secret}=${value}" >> $GITHUB_ENV
+            done
 
       - name: Replace Tokens in appsettings.json
         uses: cschleiden/replace-tokens@v1
         with:
-          files: '**/appsetting.json'
+          files: '**/appsettings.json'
           tokenPrefix: "#{" 
           tokenSuffix: "}#"
         env:
-          EncryptionKey: ${{ env.ENCRYPTION_KEY }}
-          ExtenalGeoFencingCorpIds: ${{ env.EXTERNAL_GEOFENCING_CORP_IDS }}
-          Jwt-Expiry: ${{ env.JWT_EXPIRY }}
-          prismhrclientId: ${{ env.PRISMHR_CLIENT_ID }}
-          service-bus-connectionstring: ${{ env.SERVICE_BUS_CONNECTION }}
+          EncryptionKey: ${{ env.EncryptionKey }}
+          ExtenalGeoFencingCorpIds: ${{ env.ExtenalGeoFencingCorpIds }}
+          Jwt-Expiry: ${{ env.Jwt-Expiry }}
+          prismhrclientId: ${{ env.prismhrclientId }}
+          service-bus-connectionstring: ${{ env.service-bus-connectionstring }}
 
       - name: Verify Token Replacement
         run: |
           echo "Displaying replaced appsettings.json content:"
-          cat appsetting.json
+          cat appsettings.json
