@@ -3,7 +3,8 @@ name: Replace and Verify Tokens
 on:
   push:
     branches:
-      - main
+      - develop
+      - 'release/*'
 
 jobs:
   replace-tokens:
@@ -11,18 +12,29 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set Environment Variable
+        run: |
+          if [[ $GITHUB_REF == refs/heads/release/* ]]; then
+            echo "ENV=uat" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF == refs/heads/develop ]]; then
+            echo "ENV=dev" >> $GITHUB_ENV
+          fi
+
       - name: Azure login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS1 }}
-
       - name: Fetch secrets and set variables
         uses: azure/cli@v1
         with:
           inlineScript: |
-            secrets=$(az keyvault secret list --vault-name qwertydemoprism --query '[].name' -o tsv)
+            # Set Key Vault name based on environment
+            
+            
+            # Fetch and set all secrets from Key Vault
+            secrets=$(az keyvault secret list --vault-name $KEYVAULT_NAME --query '[].name' -o tsv)
             for secret in $secrets; do
-              value=$(az keyvault secret show --name $secret --vault-name qwertydemoprism --query 'value' -o tsv)
+              value=$(az keyvault secret show --name $secret --vault-name $KEYVAULT_NAME --query 'value' -o tsv)
               echo "${secret}=${value}" >> $GITHUB_ENV
             done
 
@@ -41,5 +53,6 @@ jobs:
 
       - name: Verify Token Replacement
         run: |
+          echo "Environment: ${{ env.ENV }}"
           echo "Displaying replaced appsettings.json content:"
           cat appsettings.json
