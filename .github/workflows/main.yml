@@ -1,3 +1,4 @@
+
 name: Use Azure Key Vault Secrets
 
 on:
@@ -9,14 +10,22 @@ jobs:
   use-secrets:
     runs-on: ubuntu-latest
     steps:
-      - name: Azure login
+      # Step 1: Login to Azure
+      - name: Login to Azure
         uses: azure/login@v1
         with:
-          creds: '{"clientId":"${{ secrets.CLIENTID }}","clientSecret":"${{ secrets.CLIENTSECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTIONID }}","tenantId":"${{ secrets.TENANTID }}"}'
+          creds: ${{ secrets.AZURE_CREDENTIALS1 }}
 
+      # Step 2: Fetch Secrets from Azure Key Vault
       - name: Get secrets from Azure Key Vault
-        uses: azure/cli@v1
+        uses: azure/keyvault-secrets@v1
         with:
-          inlineScript: |
-            echo "ENCRYPTION_KEY=$(az keyvault secret show --name EncryptionKey --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
-            echo "EXTERNAL_GEOFENCING_CORP_IDS=$(az keyvault secret show --name ExtenalGeoFencingCorpIds --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)" >> $GITHUB_ENV
+          keyvault: qwertydemoprism # Replace with your Key Vault name
+          secrets: |
+            EncryptionKey
+            ExtenalGeoFencingCorpIds
+      # Step 3: Use the Secrets
+      - name: Print Secret (for demonstration)
+        run: |
+          echo "Secret 1: ${{ secrets.EncryptionKey }}"
+          echo "Secret 2: ${{ secrets.ExtenalGeoFencingCorpIds }}"
