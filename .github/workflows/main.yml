@@ -5,6 +5,8 @@ on:
     branches:
       - develop
       - release
+      - 'release/**'
+      - 'release*'
 
 jobs:
   replace-tokens:
@@ -14,7 +16,7 @@ jobs:
 
       - name: Set Environment Variable and KeyVault
         run: |
-          if [[ $GITHUB_REF == refs/heads/release/* ]]; then
+          if [[ $GITHUB_REF == refs/heads/release* ]]; then
             echo "ENV=uat" >> $GITHUB_ENV
             echo "KEYVAULT_NAME=qwertyrelease" >> $GITHUB_ENV
           elif [[ $GITHUB_REF == refs/heads/develop ]]; then
@@ -44,14 +46,14 @@ jobs:
           tokenPrefix: "#{" 
           tokenSuffix: "}#"
         env:
-          EncryptionKey: ${{ github.ref == 'refs/heads/develop' && env.EncryptionKey || '' }}
-          ExtenalGeoFencingCorpIds: ${{ github.ref == 'refs/heads/develop' && env.ExtenalGeoFencingCorpIds || '' }}
-          Jwt-Expiry: ${{ github.ref == 'refs/heads/develop' && env.Jwt-Expiry || '' }}
-          prismhrclientId: ${{ github.ref == 'refs/heads/develop' && env.prismhrclientId || '' }}
-          service-bus-connectionstring: ${{ github.ref == 'refs/heads/develop' && env.service-bus-connectionstring || '' }}
-          Notification-URI: ${{ startsWith(github.ref, 'refs/heads/release/') && env.Notification-URI || '' }}
-          Proxy-URI: ${{ startsWith(github.ref, 'refs/heads/release/') && env.Proxy-URI || '' }}
-          x-tlm-auth: ${{ startsWith(github.ref, 'refs/heads/release/') && env.x-tlm-auth || '' }}
+          EncryptionKey: ${{ env.EncryptionKey }}
+          ExtenalGeoFencingCorpIds: ${{ env.ExtenalGeoFencingCorpIds }}
+          Jwt-Expiry: ${{ env.Jwt-Expiry }}
+          prismhrclientId: ${{ env.prismhrclientId }}
+          service-bus-connectionstring: ${{ env.service-bus-connectionstring }}
+          Notification-URI: ${{ env.Notification-URI }}
+          Proxy-URI: ${{ env.Proxy-URI }}
+          x-tlm-auth: ${{ env.x-tlm-auth }}
 
       - name: Verify Token Replacement
         run: |
