@@ -1,45 +1,23 @@
-name: Replace and Verify Tokens
+name: Trigger Pipeline in Pipeline Repo
 
 on:
   push:
     branches:
-      - main
+      - develop        # Trigger when there's a push to the 'develop' branch
+      - 'release/*'    # Trigger when there's a push to any 'release/*' branch
 
 jobs:
-  replace-tokens:
+  trigger-pipeline:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Azure login
-        uses: azure/login@v1
+      - name: Trigger the CI/CD pipeline in the Pipeline Repo
+        uses: peter-evans/repository-dispatch@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS1 }}
-
-      - name: Fetch secrets and set variables
-        uses: azure/cli@v1
-        with:
-          inlineScript: |
-            secrets=$(az keyvault secret list --vault-name qwertydemoprism --query '[].name' -o tsv)
-            for secret in $secrets; do
-              value=$(az keyvault secret show --name $secret --vault-name qwertydemoprism --query 'value' -o tsv)
-              echo "${secret}=${value}" >> $GITHUB_ENV
-            done
-
-      - name: Replace Tokens in appsettings.json
-        uses: cschleiden/replace-tokens@v1
-        with:
-          files: '**/appsettings.json'
-          tokenPrefix: "#{" 
-          tokenSuffix: "}#"
-        env:
-          EncryptionKey: ${{ env.EncryptionKey }}
-          ExtenalGeoFencingCorpIds: ${{ env.ExtenalGeoFencingCorpIds }}
-          Jwt-Expiry: ${{ env.Jwt-Expiry }}
-          prismhrclientId: ${{ env.prismhrclientId }}
-          service-bus-connectionstring: ${{ env.service-bus-connectionstring }}
-
-      - name: Verify Token Replacement
-        run: |
-          echo "Displaying replaced appsettings.json content:"
-          cat appsettings.json
+          repository: Abhishek-281/Pipeline-repo  # Replace with your actual pipeline repo name
+          token: ${{ secrets.GH_TOKEN }}  # Use your GitHub token for authentication
+          event-type: trigger-pipeline  # Custom event name
+          client-payload: |
+            {
+              "ref": "${GITHUB_REF}"
+            }  # Pass the branch name from the Hadiya-repo
