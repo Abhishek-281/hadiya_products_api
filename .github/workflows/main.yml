@@ -1,23 +1,25 @@
-name: Trigger Pipeline in Pipeline Repo
+name: Trigger Build Pipeline
 
 on:
   push:
     branches:
-      - develop        # Trigger when there's a push to the 'develop' branch
-      - 'release/*'    # Trigger when there's a push to any 'release/*' branch
+      - develop
+      - release
 
 jobs:
-  trigger-pipeline:
+  trigger-build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger the CI/CD pipeline in the Pipeline Repo
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          repository: Abhishek-281/Pipeline-repo  # Replace with your actual pipeline repo name
-          token: ${{ secrets.GH_TOKEN }}  # Use your GitHub token for authentication
-          event-type: trigger-pipeline  # Custom event name
-          client-payload: |
-            {
-              "ref": "${GITHUB_REF}"
-            }  # Pass the branch name from the Hadiya-repo
+    # Step 1: Authenticate with PAT
+    - name: Authenticate with PAT
+      run: |
+        echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+
+    # Step 2: Trigger Reusable Workflow in Pipeline Repo
+    - name: Trigger Reusable Workflow
+      uses: pipeline-repo/.github/workflows/build-and-push.yml@main
+      with:
+        branch: ${{ github.ref_name }}               # Pass the branch name dynamically
+        app_name: "hadiya-app"                      # Static value: Name of your app
+        acr_name: "demoregistry124"             # Static value: Namespace in AKS
